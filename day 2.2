@@ -1,0 +1,25 @@
+# Load necessary libraries
+library(ggplot2)
+library(hexbin)
+
+# Create the dataset
+data <- data.frame(
+  Date = as.Date(c("2023-01-01", "2023-01-02", "2023-01-03", 
+                   "2023-01-04", "2023-01-05", "2023-01-06", "2023-01-07")),
+  Likes = c(150, 200, 250, 300, 350, 400, 450),
+  Comments = c(20, 25, 30, 35, 40, 45, 50),
+  Shares = c(30, 35, 40, 45, 50, 55, 60)
+)
+
+# Melt the dataset for plotting
+library(reshape2)
+data_melted <- melt(data, id.vars = "Date", variable.name = "Engagement_Type", value.name = "Count")
+
+# Create the hexbin plot
+ggplot(data_melted, aes(x = Date, y = Count)) +
+  geom_hex(bins = 10) +
+  labs(title = "Daily Social Media Engagement",
+       x = "Date",
+       y = "Count") +
+  theme_minimal() +
+  scale_fill_continuous(type = "viridis")
