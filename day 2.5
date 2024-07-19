@@ -1,0 +1,19 @@
+# Load necessary libraries
+library(ggplot2)
+
+# Create the dataset
+data <- data.frame(
+  Month = factor(c("Jan", "Jan", "Jan", "Feb", "Feb", "Feb", "Mar", "Mar", "Mar")),
+  Employee = c("A", "B", "C", "A", "B", "C", "A", "B", "C"),
+  Score = c(85, 90, 78, 88, 92, 80, 90, 94, 82)
+)
+
+# Create the histogram plot
+ggplot(data, aes(x = Score, fill = Employee)) +
+  geom_histogram(binwidth = 2, position = "dodge", alpha = 0.7) +
+  labs(title = "Monthly Performance Scores of Employees",
+       x = "Score",
+       y = "Count",
+       fill = "Employee") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Dark2")
