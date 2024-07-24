@@ -1,0 +1,9 @@
+# Creating a data frame with the provided environmental data
+env_data <- data.frame(
+  Location = c('A', 'B', 'C', 'D', 'E'),
+  Temperature = c(15, 20, 18, 12, 17),
+  Humidity = c(65, 70, 68, 60, 72),
+  CO2_Levels = c(400, 450, 420, 380, 430)
+)
+
+print(env_data)
