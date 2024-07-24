@@ -1,0 +1,31 @@
+# Since the data points are limited, create a mesh grid for the surface plot
+temp_levels <- seq(min(env_data$Temperature), max(env_data$Temperature), length.out = 5)
+humid_levels <- seq(min(env_data$Humidity), max(env_data$Humidity), length.out = 5)
+
+# Create a grid for Temperature and Humidity
+temp_grid <- rep(temp_levels, each = length(humid_levels))
+humid_grid <- rep(humid_levels, times = length(temp_levels))
+
+# Dummy CO2 levels for surface plot visualization
+co2_grid <- rep(NA, length(temp_grid))
+for (i in 1:length(temp_grid)) {
+  temp_val <- temp_grid[i]
+  humid_val <- humid_grid[i]
+  subset <- env_data[env_data$Temperature == temp_val & env_data$Humidity == humid_val,]
+  co2_grid[i] <- ifelse(nrow(subset) > 0, subset$CO2_Levels, mean(env_data$CO2_Levels))
+}
+
+# Create a data frame for the surface plot
+surface_data <- data.frame(Temperature = temp_grid, Humidity = humid_grid, CO2_Levels = co2_grid)
+
+# Create the 3D surface plot
+fig <- plot_ly(x = ~temp_grid, y = ~humid_grid, z = ~co2_grid, 
+               type = 'surface')
+
+fig <- fig %>% layout(scene = list(
+  xaxis = list(title = 'Temperature (°C)'),
+  yaxis = list(title = 'Humidity (%)'),
+  zaxis = list(title = 'CO2 Levels (ppm)')
+))
+
+fig
