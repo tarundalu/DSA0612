@@ -1,0 +1,107 @@
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(plotly)
+
+store_sales_data <- data.frame(
+  Store_ID = 1:48,
+  Region = rep(c("North", "South", "East", "West"), each = 12),
+  Month = rep(c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"), 4),
+  Total_Sales = c(10000, 15000, 12000, 13000, 9000, 16000, 14000, 11000, 11000, 17000, 13000, 15000,
+                  12000, 18000, 16000, 14000, 13000, 19000, 15000, 16000, 14000, 20000, 17000, 15000,
+                  15000, 21000, 16000, 14000, 16000, 22000, 13000, 15000, 12000, 18000, 16000, 14000,
+                  13000, 19000, 15000, 16000, 14000, 20000, 17000, 15000, 15000, 21000, 16000, 14000),
+  Number_Of_Customers = c(500, 700, 600, 650, 450, 800, 700, 550, 550, 850, 650, 750,
+                          600, 900, 800, 700, 650, 950, 750, 800, 700, 1000, 850, 750,
+                          750, 1050, 800, 700, 800, 1100, 650, 750, 600, 900, 800, 700,
+                          650, 950, 750, 800, 700, 1000, 850, 750, 750, 1050, 800, 700),
+  Average_Transaction_Value = rep(20, 48)
+)
+
+store_sales_data$Month <- paste(store_sales_data$Month, "2023")
+
+store_sales_data$Month <- parse_date_time(store_sales_data$Month, orders = "my")
+
+if(any(is.na(store_sales_data$Month))) {
+  stop("Error in parsing month dates")
+}
+
+write.csv(store_sales_data, "store_sales_data.csv", row.names = FALSE)
+
+data <- read.csv("store_sales_data.csv")
+
+data$Month <- parse_date_time(data$Month, orders = "ymd")
+
+sum(is.na(data))
+
+if(any(is.na(data$Month))) {
+  stop("Error in parsing month dates")
+}
+
+str(data)
+
+data <- data %>%
+  mutate(Year = year(Month),
+         Month_Num = month(Month))
+
+summary(data)
+
+region_sales <- data %>%
+  group_by(Region) %>%
+  summarize(Total_Sales = sum(Total_Sales))
+
+ggplot(region_sales, aes(x = Region, y = Total_Sales, fill = Region)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Total Sales by Region")
+
+month_sales <- data %>%
+  group_by(Month) %>%
+  summarize(Total_Sales = sum(Total_Sales))
+
+ggplot(month_sales, aes(x = Month, y = Total_Sales)) +
+  geom_line() +
+  labs(title = "Total Sales by Month")
+
+ggplot(data, aes(x = Total_Sales)) +
+  geom_histogram(binwidth = 1000) +
+  labs(title = "Distribution of Total Sales")
+
+month_customers <- data %>%
+  group_by(Month) %>%
+  summarize(Total_Customers = sum(Number_Of_Customers))
+
+ggplot(month_customers, aes(x = Month, y = Total_Customers)) +
+  geom_line() +
+  labs(title = "Total Number of Customers by Month")
+
+mean_atv <- mean(data$Average_Transaction_Value)
+median_atv <- median(data$Average_Transaction_Value)
+sd_atv <- sd(data$Average_Transaction_Value)
+
+mean_atv
+median_atv
+sd_atv
+
+ggplot(data, aes(x = Month, y = Total_Sales)) +
+  geom_line() +
+  geom_smooth(method = "lm") +
+  labs(title = "Trendline of Total Sales")
+
+seasonal_sales <- data %>%
+  group_by(Region, Month) %>%
+  summarize(Total_Sales = sum(Total_Sales))
+
+ggplot(seasonal_sales, aes(x = Month, y = Total_Sales, color = Region)) +
+  geom_line() +
+  labs(title = "Seasonal Sales in Each Region")
+
+ggplot(data, aes(x = Number_Of_Customers, y = Total_Sales, color = Region)) +
+  geom_point() +
+  labs(title = "Region-Based Sales over Number of Customers")
+
+ggplot(data, aes(x = Region, y = Average_Transaction_Value, fill = Region)) +
+  geom_boxplot() +
+  labs(title = "Average Transaction Value by Region")
+
+plot_ly(data, x = ~Total_Sales, y = ~Number_Of_Customers, z = ~Average_Transaction_Value, type = "scatter3d", mode = "markers", color = ~Region)
